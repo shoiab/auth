@@ -33,12 +33,12 @@ public class DataServiceImpl implements DataService {
 	private RedisTemplate<String, Object> template;
 	
 	@Override
-	public JSONObject authenticate(JSONObject userobj) throws ParseException {
+	public JSONObject authenticate(String email, String password) throws ParseException {
 			
 			HttpStatus httpstatus = null;
-			UserModel user = dbservice.getUserObj(userobj.get("email").toString());
+			UserModel user = dbservice.getUserObj(email);
 			
-			boolean authStatus = encryptor.compareWithEncryptText(userobj.get("password").toString(), user.getPassword());
+			boolean authStatus = encryptor.compareWithEncryptText(password, user.getPassword());
 			JSONObject authResponse = new JSONObject();
 			
 			

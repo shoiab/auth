@@ -5,5 +5,5 @@ import org.json.simple.parser.ParseException;
 
 public interface DataService {
 
-	public JSONObject authenticate(JSONObject userobj) throws ParseException;
+	public JSONObject authenticate(String email, String password) throws ParseException;
 }
