@@ -29,8 +29,8 @@ public class AuthController {
 	public @ResponseBody JSONObject authenticate(
 			@RequestParam(value = "email") String email)
 			throws NoSuchAlgorithmException, ParseException, URISyntaxException, SolrServerException, IOException {
-		logger.info("email"+email);
 		return dataservice.authenticate(email);
+
 	}
 
 }
