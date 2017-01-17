@@ -25,7 +25,6 @@ public class AuthController {
 			@RequestParam(value = "email") String email,
 			@RequestParam(value = "password") String password)
 			throws NoSuchAlgorithmException, ParseException, URISyntaxException {
-		System.out.println("email"+email+"password"+password);
 		return dataservice.authenticate(email, password);
 	}
 
