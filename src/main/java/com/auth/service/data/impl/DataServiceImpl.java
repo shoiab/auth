@@ -1,7 +1,11 @@
 package com.auth.service.data.impl;
 
+import java.io.IOException;
 import java.util.UUID;
 
+import org.apache.log4j.Logger;
+import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.common.SolrDocumentList;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -10,15 +14,19 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import com.auth.config.SolrConfig;
 import com.auth.dbOperation.DbOperationService;
 import com.auth.model.UserModel;
 import com.auth.service.data.DataService;
+import com.auth.solrService.SearchHandler;
 import com.auth.utils.Encrypt;
 import com.auth.utils.UUIDGeneratorForUser;
 import com.google.gson.Gson;
 
 @Service
 public class DataServiceImpl implements DataService {
+	
+	private static final Logger logger = Logger.getLogger(DataServiceImpl.class.getName());
 	
 	@Autowired
 	public Encrypt encryptor;
@@ -32,14 +40,26 @@ public class DataServiceImpl implements DataService {
 	@Autowired
 	private RedisTemplate<String, Object> template;
 	
+	@Autowired
+	private SearchHandler solrservice;
+	
 	@Override
-	public JSONObject authenticate(String email, String password) throws ParseException {
+	public JSONObject authenticate(String email) throws ParseException, SolrServerException, IOException {
 			
 			HttpStatus httpstatus = null;
-			UserModel user = dbservice.getUserObj(email);
+			/*UserModel user = dbservice.getUserObj(email);
 			
-			boolean authStatus = encryptor.compareWithEncryptText(password, user.getPassword());
+			boolean authStatus = encryptor.compareWithEncryptText(password, user.getPassword());*/
+			
 			JSONObject authResponse = new JSONObject();
+			SolrDocumentList userdoc = solrservice.checkForUser(email);
+			boolean authStatus = false;
+			
+			if(userdoc.size() > 0){
+				authStatus = true;
+			}
+			
+			logger.info("user name :: "+userdoc.get(0).get("emp_name"));
 			
 			
 			if(authStatus){
@@ -47,12 +67,12 @@ public class DataServiceImpl implements DataService {
 				System.out.println("uuid :: "+uuidForUser);
 				
 				Gson gson = new Gson();
-			    String json = gson.toJson(user);    
+			    String json = gson.toJson(userdoc.get(0));    
 			    JSONParser parser = new JSONParser();
 			    JSONObject jsonobj = (JSONObject) parser.parse(json);
-			    jsonobj.remove("password");
+			    //jsonobj.remove("password");
 
-			    System.out.println(jsonobj);
+			    logger.info(jsonobj);
 			    
 			    httpstatus = setUserInRedis(uuidForUser, jsonobj);
 			    authResponse.put("key", "user:"+uuidForUser);

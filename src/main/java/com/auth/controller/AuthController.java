@@ -1,8 +1,11 @@
 package com.auth.controller;
 
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 
+import org.apache.log4j.Logger;
+import org.apache.solr.client.solrj.SolrServerException;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,16 +20,17 @@ import com.auth.service.data.DataService;
 @RestController
 public class AuthController {
 	
+	public static final Logger logger = Logger.getLogger(AuthController.class.getName());
+	
 	@Autowired
 	DataService dataservice;
 	
 	@RequestMapping(value = "/auth", method = RequestMethod.POST)
 	public @ResponseBody JSONObject authenticate(
-			@RequestParam(value = "email") String email,
-			@RequestParam(value = "password") String password)
-			throws NoSuchAlgorithmException, ParseException, URISyntaxException {
-		System.out.println("email"+email+"password"+password);
-		return dataservice.authenticate(email, password);
+			@RequestParam(value = "email") String email)
+			throws NoSuchAlgorithmException, ParseException, URISyntaxException, SolrServerException, IOException {
+		logger.info("email"+email);
+		return dataservice.authenticate(email);
 	}
 
 }
